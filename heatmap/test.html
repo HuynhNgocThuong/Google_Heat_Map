@@ -1,0 +1,83 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Google Maps JavaScript API v3: Heatmap Layer</title>
+<link href="http://code.google.com//apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css">
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARlQ18jgebwhAqybjq4FXAeBkBqJ1Egb8&sensor=true&libraries=visualization">
+</script>
+</head>
+<body>
+<div id="map_canvas" style="height: 600px; width: 800px;"></div>
+<p id="demo"><b>VIEW ARRAY</b></p>
+<p id="heat"><b>VIEW ARRAY HEAT</b></p>
+<button id="viewDemo">VIEW</button>
+
+<script type="text/javascript">
+(
+  function( )
+  {
+      // we need this variable to be a scope variable:
+      var heatMapData;
+
+      // create the map:
+      
+      var mapOptions = {
+          zoom: 17,
+          center: new google.maps.LatLng(-33.863422, 151.171936),
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+      };
+      var map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
+      
+
+      var request = ( window.XMLHttpRequest != null ) 
+             ? new XMLHttpRequest()
+             : new ActiveXObject('Microsoft.XMLHTTP');
+      request.open("GET", "heatjson.txt", true);
+      request.onreadystatechange = loadHeatMap;
+      request.send(null);
+
+      function loadHeatMap( )
+      {
+          if (request.readyState == 4 && request.status == 200 )
+          {
+              heatMapData = JSON.parse( request.responseText );
+              // transform the incorrect heat map to a correct one
+              document.getElementById("heat").innerHTML = JSON.stringify(heatMapData); 
+              for ( var t = 0; t < heatMapData.length; ++t )
+              {
+                  var elem = heatMapData[t];
+                  elem.location = 
+                      new google.maps.LatLng(
+                          Number(elem.location[0]),
+                          Number(elem.location[1])
+                      ); 
+                  elem.weight = Number(elem.weight);
+              }
+              var pointArray = new google.maps.MVCArray(heatMapData);
+
+              var heatmap = new google.maps.visualization.HeatmapLayer(
+                  {
+                      data: pointArray,
+                      dissipating: true,
+                      radius: 150,
+                      maxIntensity: 3
+                  }
+              );
+              heatmap.setMap(map);
+          }
+      }
+
+      document.getElementById("viewDemo").onclick =
+      function ()
+      {
+          document.getElementById("demo").innerHTML
+              = JSON.stringify(heatMapData);  
+      }
+  }
+)();
+</script>
+</body>
+</html>

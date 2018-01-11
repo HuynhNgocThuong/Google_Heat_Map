@@ -1,0 +1,181 @@
+<!DOCTYPE html >
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Using MySQL and PHP with Google Maps</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="map"></div>
+
+    <script>
+      var customLabel = {
+        restaurant: {
+          label: 'R'
+        },
+        bar: {
+          label: 'B'
+        }
+      };
+
+        function initMap() {
+
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: new google.maps.LatLng(-33.863276, 151.207977),
+          zoom: 12
+        });
+        var infoWindow = new google.maps.InfoWindow;
+
+      // Change this depending on the name of your PHP file
+	  function update() {
+      downloadUrl("maps.php", function(data) {	
+        var xml = data.responseXML;
+        var markers = xml.documentElement.getElementsByTagName("marker");
+
+        for (var i = 0; i < markers.length; i++) {
+         var name = markers[i].getAttribute("name");
+         var address = markers[i].getAttribute("address");
+         var type = markers[i].getAttribute("type");
+         var point = new google.maps.LatLng(
+              parseFloat(markers[i].getAttribute("lat")),
+              parseFloat(markers[i].getAttribute("lng")));
+         var html = "<b>"  + name + "</b> <br/>" + address;
+          //var icon = customIcons[type] || {};
+		  
+          var marker = new google.maps.Marker({
+            map: map,
+            position: point,
+            //icon: 'http://download.seaicons.com/icons/icons-land/vista-map-markers/16/Map-Marker-Bubble-Pink-icon.png',
+            //shadow: icon.shadow
+          });
+	 //google.maps.event.addListener(marker, "dblclick", function() {
+    //marker.setMap(null);
+//});
+		  
+         bindInfoWindow(marker, map, infoWindow, html);
+         //End loop for
+        }
+      //End downloadUrl
+      });
+ //End update
+ }
+       setInterval(update, 1000);
+       //End initMap
+        }
+
+         function bindInfoWindow(marker, map, infoWindow, html) {
+      google.maps.event.addListener(marker, 'click', function() {
+        infoWindow.setContent(html);
+       infoWindow.open(map, marker);
+      });
+    }
+
+
+
+      function downloadUrl(url, callback) {
+        var request = window.ActiveXObject ?
+            new ActiveXObject('Microsoft.XMLHTTP') :
+            new XMLHttpRequest;
+
+        request.onreadystatechange = function() {
+          if (request.readyState == 4) {
+            request.onreadystatechange = doNothing;
+            callback(request, request.status);
+          }
+        };
+
+        request.open('GET', url, true);
+        request.send(null);
+      }
+
+      function doNothing() {}
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDL1BCuh_sR6qy-PmKJyCMB9fzQSozVj0I&callback=initMap">
+    </script>
+  </body>
+</html>
+
+
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html>
+<body>
+
+<h1>My First Google Map</h1>
+
+<div id="googleMap" style="width:100%;height:400px;"></div> 
+<div></div>
+
+<script>
+function myMap() {
+
+/*Option for a map*/
+var mapOptions= {
+    center: new google.maps.LatLng(16.061,  108.178), 
+    //center: {lat: 16.061, lng: 108.178},
+    zoom:8,
+    mapTypeId: google.maps.MapTypeId.ROADMAP,
+    disableDefaultUI: true
+};
+var mapCanavas = document.getElementById("googleMap");
+
+// Create a newmap
+var map = new google.maps.Map(mapCanavas ,mapOptions);
+
+google.maps.event.addListener(map, 'click', function(event){
+	placeMarker(map, event.latLng);
+
+});
+/*End myMap*/
+}
+function placeMarker(map, location) {
+	var marker = new google.maps.Marker({
+		position: location,
+		map: map
+	});
+	var infowindow = new google.maps.InfoWindow({
+		content: 'Latitude: '+ location.lat() + '<br> Longtitude: ' +location.lng()
+	});
+	infowindow.open(map, marker);
+}
+
+/*
+// Add marker 
+var marker = new google.maps.Marker({
+	position: new google.maps.LatLng(16.061,  108.178),
+	map: map,
+	animation: google.maps.Animation.DROP
+});
+//Some text content for a marker:
+var infowindow = new google.maps.InfoWindow({
+    content: "Nha tao!"
+  });
+  infowindow.open(map,marker);
+
+*/
+
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDL1BCuh_sR6qy-PmKJyCMB9fzQSozVj0I&callback=myMap"></script>
+
+</body>
+</html>
+-->

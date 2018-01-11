@@ -1,0 +1,104 @@
+<!DOCTYPE html >
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Using MySQL and PHP with Google Maps</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="map"></div>
+
+    <script>
+      var customLabel = {
+        restaurant: {
+          label: 'R'
+        },
+        bar: {
+          label: 'B'
+        }
+      };
+
+        function initMap() {
+
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: new google.maps.LatLng(-33.863276, 151.207977),
+          zoom: 12
+        });
+        var infoWindow = new google.maps.InfoWindow;
+
+      // Change this depending on the name of your PHP file
+      function update() {
+      downloadUrl("maps.php", function(data) {  
+        var xml = data.responseXML;
+        var markers = xml.documentElement.getElementsByTagName("marker");
+
+       for (var i = 0; i < markers.length; i++) { //loop through nodes getting info
+        var point = new google.maps.LatLng(
+        parseFloat(markers[i].getAttribute("lat")),
+        parseFloat(markers[i].getAttribute("lng")));
+        var intensity = markers[i].getAttribute("intensity");
+         var html = "<b>"  + name + "</b> <br/>" + address;
+          //var icon = customIcons[type] || {};
+         var marker = new google.maps.Marker({
+               map: map,
+               position: point,
+          });    
+         bindInfoWindow(marker, map, infoWindow, html);
+         //End loop for
+        }
+      //End downloadUrl
+      });
+ //End update
+ }
+
+       setInterval(update, 1000);
+       //End initMap
+        }
+
+         function bindInfoWindow(marker, map, infoWindow, html) {
+      google.maps.event.addListener(marker, 'click', function() {
+        infoWindow.setContent(html);
+       infoWindow.open(map, marker);
+      });
+    }
+
+
+
+      function downloadUrl(url, callback) {
+        var request = window.ActiveXObject ?
+            new ActiveXObject('Microsoft.XMLHTTP') :
+            new XMLHttpRequest;
+
+        request.onreadystatechange = function() {
+          if (request.readyState == 4) {
+            request.onreadystatechange = doNothing;
+            callback(request, request.status);
+          }
+        };
+
+        request.open('GET', url, true);
+        request.send(null);
+      }
+
+      function doNothing() {}
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDL1BCuh_sR6qy-PmKJyCMB9fzQSozVj0I&callback=initMap">
+    </script>
+  </body>
+</html>
+
+
